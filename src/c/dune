@@ -22,10 +22,24 @@
  (action (run %{cc} -o %{targets} %{deps} -I %{lib:ctypes:.} -I %{ocaml_where})))
 
 (rule
+ (target stubgen_fixer.sh)
+ (action (progn
+        (with-stdout-to %{target}
+         (progn
+          (run echo sed -i "s/1074021776/7777/g" okeyfum_c_generated_types.ml)
+          (run echo sed -i "s/1074025829/7777/g" okeyfum_c_generated_types.ml)
+          (run echo sed -i "s/1074025828/7777/g" okeyfum_c_generated_types.ml)
+        )))))
+
+(rule
  (targets okeyfum_c_generated_types.ml)
- (deps ffi_ml_types_stubgen.exe)
- (action (with-stdout-to %{targets}
-           (run %{deps}))))
+ (deps ffi_ml_types_stubgen.exe stubgen_fixer.sh)
+ (action (progn
+           (with-stdout-to %{targets}
+            (run %{dep:ffi_ml_types_stubgen.exe}))
+           (progn
+            (run bash %{dep:stubgen_fixer.sh}))
+           )))
 
 (library
  (name okeyfum_c)
